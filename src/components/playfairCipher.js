@@ -11,7 +11,6 @@ function PlayfairCipher(){
     }
 
     const textToBigram = (text) => {
-        console.log(text)
         text = text.toUpperCase()
         text = text.replace(/\s/g, '') //menghapus semua spasi
         text = text.replace(/J/g, 'I') //mengganti j dengan i
@@ -89,7 +88,6 @@ function PlayfairCipher(){
                 
                 //pemilihan algoritma enkripsi menurut letak bigram
                 if (row1 === row2){ //sebaris
-                    //result.push(key[])
                     result[i] = key[row1][(col1+1)%5].concat(key[row2][(col2+1)%5])
                 } else if (col1 === col2){ //satu kolom
                     result[i] = key[(row1+1)%5][col1].concat(key[(row2+1)%5][col2])
@@ -104,15 +102,13 @@ function PlayfairCipher(){
     }
 
     const decrypt = (ciphertext, letterKey) => {
-        if(letterKey.length > 1 && plaintext.length > 1){
+        if(letterKey.length > 1 && ciphertext.length > 1){
             let result = []
             let bigram = ciphertext.match(/.{1,2}/g)
-            console.log(ciphertext)
-            console.log("decrypt: ", bigram)
             let key = transformToMatrix(letterKey)
-        
+
             for(let i = 0; i < bigram.length; i++){
-                const regex = bigram[i]
+                const regex = bigram[i].toUpperCase()
                 let firstLetterCoord = []
                 let secondLetterCoord = []
         
@@ -129,17 +125,15 @@ function PlayfairCipher(){
                 let row2 = secondLetterCoord[0]
                 let col1 = firstLetterCoord[1]
                 let col2 = secondLetterCoord[1]
-                
+
                 //pemilihan algoritma dekripsi menurut letak bigram
                 if (row1 === row2){ //sebaris
-                    //result.push(key[])
-                    result[i] = key[row1][(col1-1)%5].concat(key[row2][(col2-1)%5])
+                    result[i] = key[row1][(col1+4)%5].concat(key[row2][(col2+4)%5]) // (col1 - 1 + 5) untuk mengatasi modulo minus
                 } else if (col1 === col2){ //satu kolom
-                    result[i] = key[(row1-1)%5][col1].concat(key[(row2-1)%5][col2])
+                    result[i] = key[(row1+4)%5][col1].concat(key[(row2+4)%5][col2])
                 } else{//lainnya
                     result[i] = key[row1][col2].concat(key[row2][col1])
                 }
-                
             }
             return result
         }

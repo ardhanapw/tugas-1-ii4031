@@ -21,7 +21,6 @@ function VigenereCipher(){
             if(i < key.length){
                 k = key.charCodeAt(i)
             }
-            console.log("kunci: ", k)
 
             let x
             if(p > 96 && k != null){ //huruf kecil
