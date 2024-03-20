@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function AffineCipher(){ //keep slope and intercept minimum of 1
+function AffineCipher(){
     const [plaintext, setPlainText] = useState("")
     const [ciphertext, setCipherText] = useState("")
     const [mode, setMode] = useState("encrypt") //encrypt mode true
@@ -12,7 +12,9 @@ function AffineCipher(){ //keep slope and intercept minimum of 1
     }
 
     const decreaseSlope = () => {
-        setSlope(slope - 2)
+        if(slope > 1){
+            setSlope(slope - 2)
+        }
     }
 
     const increaseIntercept = () => {
@@ -20,7 +22,10 @@ function AffineCipher(){ //keep slope and intercept minimum of 1
     }
 
     const decreaseIntercept = () => {
-        setIntercept(intercept - 1)
+        if(intercept > 1){
+            setIntercept(intercept - 1)
+        }
+       
     }
 
     const handleMode = (event) => {

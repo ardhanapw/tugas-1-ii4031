@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function PlayfairCipher(){ //ok
+function PlayfairCipher(){
     const [plaintext, setPlainText] = useState("")
     const [ciphertext, setCipherText] = useState("")
     const [mode, setMode] = useState("encrypt") //encrypt mode true

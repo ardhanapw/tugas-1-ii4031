@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function VigenereCipher(){ //ok
+function VigenereCipher(){
     const [plaintext, setPlainText] = useState("")
     const [ciphertext, setCipherText] = useState("")
     const [mode, setMode] = useState("encrypt") //encrypt mode true
