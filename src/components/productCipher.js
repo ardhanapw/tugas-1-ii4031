@@ -5,24 +5,28 @@ function ProductCipher(){ //not done yet
     const [ciphertext, setCipherText] = useState("")
     const [mode, setMode] = useState("encrypt") //encrypt mode true
     const [textkey, setTextKey] = useState("")
-    const [numberkey, setNumberKey] = useState("")
+    const [numberkey, setNumberKey] = useState(0)
+    
 
     const handleMode = (event) => {
         setMode(event.target.value)
     }
 
     const transpose = (result, numberkey) => {
+        let splicedResult = []
         let transposeResult = []
         result = result.split("")
 
-        for(let i = 0; i < result.length; i++){
-            if(result.length % numberkey === 0){
-                //
+        if(numberkey > 0){
+            const row = result.length/numberkey
+            for(let i = 0; i < Math.ceil(row); i++){
+                splicedResult[i] = result.splice(0, numberkey)
             }
-            else{
-                transposeResult.push(result[(i*numberkey)%result.length])
+            for(let i = 0; i < numberkey; i++){
+                for(let j = 0 ; j < Math.ceil(row); j++){
+                    splicedResult[j][i] !== undefined? transposeResult.push(splicedResult[j][i]) : transposeResult.push("X") //plaintext (result) seluruhnya huruf kecil, huruf kapital "X" sbg pembeda
+                }
             }
-            console.log((i*numberkey)%result.length)
         }
         return transposeResult
     }
@@ -30,6 +34,7 @@ function ProductCipher(){ //not done yet
     const encrypt = (plaintext, textkey, numberkey) => {
         let result = ""
         plaintext = plaintext.replace(/[^a-zA-Z]/g, "")
+        textkey = textkey.replace(/[^a-zA-Z]/g, "")
 
         for(let i = 0; i < plaintext.length;i++){
             const p = plaintext.charCodeAt(i)
@@ -45,28 +50,21 @@ function ProductCipher(){ //not done yet
                     result += String.fromCharCode(x)
                 }
             }
-
-            else if(p > 64 && k != null){ //kapital
-                if(k > 96){
-                    x = 65 + (p + (k-97)%26 - 65)%26
-                    result += String.fromCharCode(x)
-                }else if(k > 64){
-                    x = 65 + (p + (k-65)%26 - 65)%26
-                    result += String.fromCharCode(x)
-                }
-            }
         }
 
         result = transpose(result, numberkey)
         return result
     }
 
-    const decrypt = (ciphertext, key) => {
+    const decrypt = (ciphertext, textkey, numberkey) => {
         let result = ""
+        textkey = textkey.replace(/[^a-zA-Z]/g, "")
+        ciphertext = transpose(ciphertext, Math.ceil(ciphertext.length/numberkey))
+        ciphertext = ciphertext.join("").replace(/[A-Z]/g, "") //membuang huruf kapital di akhir akibat proses transposisi
 
         for(let i = 0; i < ciphertext.length;i++){
             const c = ciphertext.charCodeAt(i)
-            const k = key.charCodeAt(i % key.length)
+            const k = textkey.charCodeAt(i % textkey.length)
 
             let x
             if(c > 96){ //huruf kecil
@@ -75,15 +73,6 @@ function ProductCipher(){ //not done yet
                     result += String.fromCharCode(x)
                 }else if(k > 64){
                     x = 97 + (c-(k+32)+26)%26
-                    result += String.fromCharCode(x)
-                }
-            }
-            else if(c > 64){ //kapital
-                if(k > 96){
-                    x = 65 + (c-(k-32)+26)%26
-                    result += String.fromCharCode(x)
-                }else if(k > 64){
-                    x = 65 + (c-k+26)%26
                     result += String.fromCharCode(x)
                 }
             }
@@ -153,7 +142,7 @@ function ProductCipher(){ //not done yet
                         </h1>
                         <textarea class="w-1/2 border border-gray-300" value = {numberkey} onChange={(e) => setNumberKey(e.target.value)} maxLength="256" rows = "2" placeholder="Your key here.."/>
                         </div>
-                        <b>Result: {decrypt(plaintext, textkey, numberkey)}</b>
+                        <b>Result: {decrypt(ciphertext, textkey, numberkey)}</b>
                     </div>
                 )}
 

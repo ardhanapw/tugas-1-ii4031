@@ -13,6 +13,7 @@ function AutokeyVigenereCipher(){
     const encrypt = (plaintext, key) => { //bikin buat ignore spacebar
         let result = ""
         plaintext = plaintext.replace(/[^a-zA-Z]/g, "")
+        key = key.replace(/[^a-zA-Z]/g, "")
 
         for(let i = 0; i < plaintext.length;i++){
             const p = plaintext.charCodeAt(i)
@@ -44,6 +45,7 @@ function AutokeyVigenereCipher(){
 
     const decrypt = (ciphertext, key) => {
         let result = ""
+        key = key.replace(/[^a-zA-Z]/g, "")
 
         for(let i = 0; i < ciphertext.length;i++){
             const c = ciphertext.charCodeAt(i)
