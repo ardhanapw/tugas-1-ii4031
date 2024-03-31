@@ -51,9 +51,7 @@ function ProductCipher(){ //not done yet
                     result += String.fromCharCode(x)
                 }
             }
-            console.log(x)
         }
-        console.log(result)
         result = transpose(result, numberkey)
         return result
     }
