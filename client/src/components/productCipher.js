@@ -1,27 +1,45 @@
 import { useState } from "react";
+import { asciiToBase64 } from "../utils/base64";
 
-function VigenereCipher(){
+function ProductCipher(){ //not done yet
     const [plaintext, setPlainText] = useState("")
     const [ciphertext, setCipherText] = useState("")
     const [mode, setMode] = useState("encrypt") //encrypt mode true
-    const [key, setKey] = useState("")
+    const [textkey, setTextKey] = useState("")
+    const [numberkey, setNumberKey] = useState(0)
+    
 
     const handleMode = (event) => {
         setMode(event.target.value)
     }
 
-    const encrypt = (plaintext, key) => {
+    const transpose = (result, numberkey) => {
+        let splicedResult = []
+        let transposeResult = []
+        result = result.split("")
+
+        if(numberkey > 0){
+            const row = result.length/numberkey
+            for(let i = 0; i < Math.ceil(row); i++){
+                splicedResult[i] = result.splice(0, numberkey)
+            }
+            for(let i = 0; i < numberkey; i++){
+                for(let j = 0 ; j < Math.ceil(row); j++){
+                    splicedResult[j][i] !== undefined? transposeResult.push(splicedResult[j][i]) : transposeResult.push("x") //plaintext (result) seluruhnya huruf kecil, karakter "x" sbg pembeda
+                }
+            }
+        }
+        return transposeResult
+    }
+
+    const encrypt = (plaintext, textkey, numberkey) => {
         let result = ""
         plaintext = plaintext.replace(/[^a-zA-Z]/g, "")
-        key = key.replace(/[^a-zA-Z]/g, "")
+        textkey = textkey.replace(/[^a-zA-Z]/g, "")
 
         for(let i = 0; i < plaintext.length;i++){
             const p = plaintext.charCodeAt(i)
-            let k
-
-            if(i < key.length){
-                k = key.charCodeAt(i)
-            }
+            const k = textkey.charCodeAt(i % textkey.length)
 
             let x
             if(p > 96 && k != null){ //huruf kecil
@@ -33,38 +51,25 @@ function VigenereCipher(){
                     result += String.fromCharCode(x)
                 }
             }
-
-            else if(p > 64 && k != null){ //kapital
-                if(k > 96){
-                    x = 65 + (p + (k-97)%26 - 65)%26
-                    result += String.fromCharCode(x)
-                }else if(k > 64){
-                    x = 65 + (p + (k-65)%26 - 65)%26
-                    result += String.fromCharCode(x)
-                }
-            }
-            else{ //plaintext berubah hanya sebanyak key.length
-                result += String.fromCharCode(p)
-            }
+            console.log(x)
         }
+        console.log(result)
+        result = transpose(result, numberkey)
         return result
     }
 
-    const decrypt = (ciphertext, key) => {
+    const decrypt = (ciphertext, textkey, numberkey) => {
         let result = ""
-        key = key.replace(/[^a-zA-Z]/g, "")
+        textkey = textkey.replace(/[^a-zA-Z]/g, "")
+        ciphertext = transpose(ciphertext, Math.ceil(ciphertext.length/numberkey))
+        ciphertext = ciphertext.join("").replace(/[A-Z]/g, "") //membuang huruf kapital di akhir akibat proses transposisi
 
         for(let i = 0; i < ciphertext.length;i++){
             const c = ciphertext.charCodeAt(i)
-            let k
-            //const k = key.charCodeAt(i % key.length)
-
-            if(i < key.length){
-                k = key.charCodeAt(i)
-            }
+            const k = textkey.charCodeAt(i % textkey.length)
 
             let x
-            if(c > 96 && k != null){ //huruf kecil
+            if(c > 96){ //huruf kecil
                 if(k > 96){
                     x = 97 + (c-k+26)%26
                     result += String.fromCharCode(x)
@@ -72,18 +77,6 @@ function VigenereCipher(){
                     x = 97 + (c-(k+32)+26)%26
                     result += String.fromCharCode(x)
                 }
-            }
-            else if(c > 64 && k != null){ //kapital
-                if(k > 96){
-                    x = 65 + (c-(k-32)+26)%26
-                    result += String.fromCharCode(x)
-                }else if(k > 64){
-                    x = 65 + (c-k+26)%26
-                    result += String.fromCharCode(x)
-                }
-            }
-            else{ //plaintext berubah hanya sebanyak key.length
-                result += String.fromCharCode(c)
             }
         }
         return result
@@ -118,11 +111,18 @@ function VigenereCipher(){
                         </div>
                         <div>
                         <h1>
-                        <b>Key</b>
+                        <b>Text Key</b>
                         </h1>
-                        <textarea class="w-1/2 border border-gray-300" value = {key} onChange={(e) => setKey(e.target.value)} maxLength="256" rows = "2" placeholder="Your key here.."/>
+                        <textarea class="w-1/2 border border-gray-300" value = {textkey} onChange={(e) => setTextKey(e.target.value)} maxLength="256" rows = "2" placeholder="Your key here.."/>
                         </div>
-                        <b>Result: {encrypt(plaintext, key)}</b>
+                        <div>
+                        <h1>
+                        <b>Transpose Key</b>
+                        </h1>
+                        <textarea class="w-1/2 border border-gray-300" value = {numberkey} onChange={(e) => setNumberKey(e.target.value)} maxLength="256" rows = "2" placeholder="Your key here.."/>
+                        </div>
+                        <b>Result: {encrypt(plaintext, textkey, numberkey)}</b>
+                        <br/><b>Result in Base64: {asciiToBase64(encrypt(plaintext, textkey, numberkey))}</b>
                     </div>
                 )}
                 {(mode == "decrypt") && (
@@ -135,11 +135,17 @@ function VigenereCipher(){
                         </div>
                         <div>
                         <h1>
-                        <b>Key</b>
+                        <b>Text Key</b>
                         </h1>
-                        <textarea class="w-1/2 border border-gray-300" value = {key} onChange={(e) => setKey(e.target.value)} maxLength="256" rows = "2" placeholder="Your key here.."/>
+                        <textarea class="w-1/2 border border-gray-300" value = {textkey} onChange={(e) => setTextKey(e.target.value)} maxLength="256" rows = "2" placeholder="Your key here.."/>
                         </div>
-                        <b>Result: {decrypt(ciphertext, key)}</b>
+                        <div>
+                        <h1>
+                        <b>Transpose Key</b>
+                        </h1>
+                        <textarea class="w-1/2 border border-gray-300" value = {numberkey} onChange={(e) => setNumberKey(e.target.value)} maxLength="256" rows = "2" placeholder="Your key here.."/>
+                        </div>
+                        <b>Result: {decrypt(ciphertext, textkey, numberkey)}</b>
                     </div>
                 )}
 
@@ -148,4 +154,4 @@ function VigenereCipher(){
     )
 }
 
-export default VigenereCipher;
+export default ProductCipher;

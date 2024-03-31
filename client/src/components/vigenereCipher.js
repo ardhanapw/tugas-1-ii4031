@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { asciiToBase64 } from "../utils/base64";
 
-function AutokeyVigenereCipher(){
+function VigenereCipher(){
     const [plaintext, setPlainText] = useState("")
     const [ciphertext, setCipherText] = useState("")
     const [mode, setMode] = useState("encrypt") //encrypt mode true
@@ -10,17 +11,21 @@ function AutokeyVigenereCipher(){
         setMode(event.target.value)
     }
 
-    const encrypt = (plaintext, key) => { //bikin buat ignore spacebar
+    const encrypt = (plaintext, key) => {
         let result = ""
         plaintext = plaintext.replace(/[^a-zA-Z]/g, "")
         key = key.replace(/[^a-zA-Z]/g, "")
 
         for(let i = 0; i < plaintext.length;i++){
             const p = plaintext.charCodeAt(i)
-            const k = key.charCodeAt(i % key.length)
+            let k
+
+            if(i < key.length){
+                k = key.charCodeAt(i)
+            }
 
             let x
-            if(p > 96){ //huruf kecil
+            if(p > 96 && k != null){ //huruf kecil
                 if(k > 96){
                     x = 97 + (p + (k-97)%26 - 97)%26
                     result += String.fromCharCode(x)
@@ -30,7 +35,7 @@ function AutokeyVigenereCipher(){
                 }
             }
 
-            else if(p > 64){ //kapital
+            else if(p > 64 && k != null){ //kapital
                 if(k > 96){
                     x = 65 + (p + (k-97)%26 - 65)%26
                     result += String.fromCharCode(x)
@@ -38,6 +43,9 @@ function AutokeyVigenereCipher(){
                     x = 65 + (p + (k-65)%26 - 65)%26
                     result += String.fromCharCode(x)
                 }
+            }
+            else{ //plaintext berubah hanya sebanyak key.length
+                result += String.fromCharCode(p)
             }
         }
         return result
@@ -49,10 +57,14 @@ function AutokeyVigenereCipher(){
 
         for(let i = 0; i < ciphertext.length;i++){
             const c = ciphertext.charCodeAt(i)
-            const k = key.charCodeAt(i % key.length)
+            let k
+
+            if(i < key.length){
+                k = key.charCodeAt(i)
+            }
 
             let x
-            if(c > 96){ //huruf kecil
+            if(c > 96 && k != null){ //huruf kecil
                 if(k > 96){
                     x = 97 + (c-k+26)%26
                     result += String.fromCharCode(x)
@@ -61,7 +73,7 @@ function AutokeyVigenereCipher(){
                     result += String.fromCharCode(x)
                 }
             }
-            else if(c > 64){ //kapital
+            else if(c > 64 && k != null){ //kapital
                 if(k > 96){
                     x = 65 + (c-(k-32)+26)%26
                     result += String.fromCharCode(x)
@@ -69,6 +81,9 @@ function AutokeyVigenereCipher(){
                     x = 65 + (c-k+26)%26
                     result += String.fromCharCode(x)
                 }
+            }
+            else{ //plaintext berubah hanya sebanyak key.length
+                result += String.fromCharCode(c)
             }
         }
         return result
@@ -108,6 +123,7 @@ function AutokeyVigenereCipher(){
                         <textarea class="w-1/2 border border-gray-300" value = {key} onChange={(e) => setKey(e.target.value)} maxLength="256" rows = "2" placeholder="Your key here.."/>
                         </div>
                         <b>Result: {encrypt(plaintext, key)}</b>
+                        <br/><b>Result in Base64: {asciiToBase64(encrypt(plaintext, key))}</b>
                     </div>
                 )}
                 {(mode == "decrypt") && (
@@ -133,4 +149,4 @@ function AutokeyVigenereCipher(){
     )
 }
 
-export default AutokeyVigenereCipher;
+export default VigenereCipher;

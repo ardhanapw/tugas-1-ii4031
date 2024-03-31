@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { asciiToBase64 } from "../utils/base64";
 
 function PlayfairCipher(){
     const [plaintext, setPlainText] = useState("")
@@ -135,6 +136,9 @@ function PlayfairCipher(){
                     result[i] = key[row1][col2].concat(key[row2][col1])
                 }
             }
+            result = result.join("")
+            result = result.replaceAll(/[X]/g, "")
+
             return result
         }
     }
@@ -175,6 +179,7 @@ function PlayfairCipher(){
                         <b>
                             Result: {encrypt(plaintext, key)}
                         </b>
+                        <br/><b>Result in Base64: {asciiToBase64(encrypt(plaintext, key))}</b>
                     </div>
                 )}
                 {(mode == "decrypt") && (

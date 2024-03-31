@@ -1,47 +1,27 @@
 import { useState } from "react";
+import { asciiToBase64 } from "../utils/base64";
 
-function ProductCipher(){ //not done yet
+function AutokeyVigenereCipher(){
     const [plaintext, setPlainText] = useState("")
     const [ciphertext, setCipherText] = useState("")
     const [mode, setMode] = useState("encrypt") //encrypt mode true
-    const [textkey, setTextKey] = useState("")
-    const [numberkey, setNumberKey] = useState(0)
-    
+    const [key, setKey] = useState("")
 
     const handleMode = (event) => {
         setMode(event.target.value)
     }
 
-    const transpose = (result, numberkey) => {
-        let splicedResult = []
-        let transposeResult = []
-        result = result.split("")
-
-        if(numberkey > 0){
-            const row = result.length/numberkey
-            for(let i = 0; i < Math.ceil(row); i++){
-                splicedResult[i] = result.splice(0, numberkey)
-            }
-            for(let i = 0; i < numberkey; i++){
-                for(let j = 0 ; j < Math.ceil(row); j++){
-                    splicedResult[j][i] !== undefined? transposeResult.push(splicedResult[j][i]) : transposeResult.push("X") //plaintext (result) seluruhnya huruf kecil, huruf kapital "X" sbg pembeda
-                }
-            }
-        }
-        return transposeResult
-    }
-
-    const encrypt = (plaintext, textkey, numberkey) => {
+    const encrypt = (plaintext, key) => { //bikin buat ignore spacebar
         let result = ""
         plaintext = plaintext.replace(/[^a-zA-Z]/g, "")
-        textkey = textkey.replace(/[^a-zA-Z]/g, "")
+        key = key.replace(/[^a-zA-Z]/g, "")
 
         for(let i = 0; i < plaintext.length;i++){
             const p = plaintext.charCodeAt(i)
-            const k = textkey.charCodeAt(i % textkey.length)
+            const k = key.charCodeAt(i % key.length)
 
             let x
-            if(p > 96 && k != null){ //huruf kecil
+            if(p > 96){ //huruf kecil
                 if(k > 96){
                     x = 97 + (p + (k-97)%26 - 97)%26
                     result += String.fromCharCode(x)
@@ -50,21 +30,27 @@ function ProductCipher(){ //not done yet
                     result += String.fromCharCode(x)
                 }
             }
-        }
 
-        result = transpose(result, numberkey)
+            else if(p > 64){ //kapital
+                if(k > 96){
+                    x = 65 + (p + (k-97)%26 - 65)%26
+                    result += String.fromCharCode(x)
+                }else if(k > 64){
+                    x = 65 + (p + (k-65)%26 - 65)%26
+                    result += String.fromCharCode(x)
+                }
+            }
+        }
         return result
     }
 
-    const decrypt = (ciphertext, textkey, numberkey) => {
+    const decrypt = (ciphertext, key) => {
         let result = ""
-        textkey = textkey.replace(/[^a-zA-Z]/g, "")
-        ciphertext = transpose(ciphertext, Math.ceil(ciphertext.length/numberkey))
-        ciphertext = ciphertext.join("").replace(/[A-Z]/g, "") //membuang huruf kapital di akhir akibat proses transposisi
+        key = key.replace(/[^a-zA-Z]/g, "")
 
         for(let i = 0; i < ciphertext.length;i++){
             const c = ciphertext.charCodeAt(i)
-            const k = textkey.charCodeAt(i % textkey.length)
+            const k = key.charCodeAt(i % key.length)
 
             let x
             if(c > 96){ //huruf kecil
@@ -73,6 +59,15 @@ function ProductCipher(){ //not done yet
                     result += String.fromCharCode(x)
                 }else if(k > 64){
                     x = 97 + (c-(k+32)+26)%26
+                    result += String.fromCharCode(x)
+                }
+            }
+            else if(c > 64){ //kapital
+                if(k > 96){
+                    x = 65 + (c-(k-32)+26)%26
+                    result += String.fromCharCode(x)
+                }else if(k > 64){
+                    x = 65 + (c-k+26)%26
                     result += String.fromCharCode(x)
                 }
             }
@@ -109,17 +104,12 @@ function ProductCipher(){ //not done yet
                         </div>
                         <div>
                         <h1>
-                        <b>Text Key</b>
+                        <b>Key</b>
                         </h1>
-                        <textarea class="w-1/2 border border-gray-300" value = {textkey} onChange={(e) => setTextKey(e.target.value)} maxLength="256" rows = "2" placeholder="Your key here.."/>
+                        <textarea class="w-1/2 border border-gray-300" value = {key} onChange={(e) => setKey(e.target.value)} maxLength="256" rows = "2" placeholder="Your key here.."/>
                         </div>
-                        <div>
-                        <h1>
-                        <b>Number Key</b>
-                        </h1>
-                        <textarea class="w-1/2 border border-gray-300" value = {numberkey} onChange={(e) => setNumberKey(e.target.value)} maxLength="256" rows = "2" placeholder="Your key here.."/>
-                        </div>
-                        <b>Result: {encrypt(plaintext, textkey, numberkey)}</b>
+                        <b>Result: {encrypt(plaintext, key)}</b>
+                        <br/><b>Result in Base64: {asciiToBase64(encrypt(plaintext, key))}</b>
                     </div>
                 )}
                 {(mode == "decrypt") && (
@@ -132,17 +122,11 @@ function ProductCipher(){ //not done yet
                         </div>
                         <div>
                         <h1>
-                        <b>Text Key</b>
+                        <b>Key</b>
                         </h1>
-                        <textarea class="w-1/2 border border-gray-300" value = {textkey} onChange={(e) => setTextKey(e.target.value)} maxLength="256" rows = "2" placeholder="Your key here.."/>
+                        <textarea class="w-1/2 border border-gray-300" value = {key} onChange={(e) => setKey(e.target.value)} maxLength="256" rows = "2" placeholder="Your key here.."/>
                         </div>
-                        <div>
-                        <h1>
-                        <b>Number Key</b>
-                        </h1>
-                        <textarea class="w-1/2 border border-gray-300" value = {numberkey} onChange={(e) => setNumberKey(e.target.value)} maxLength="256" rows = "2" placeholder="Your key here.."/>
-                        </div>
-                        <b>Result: {decrypt(ciphertext, textkey, numberkey)}</b>
+                        <b>Result: {decrypt(ciphertext, key)}</b>
                     </div>
                 )}
 
@@ -151,4 +135,4 @@ function ProductCipher(){ //not done yet
     )
 }
 
-export default ProductCipher;
+export default AutokeyVigenereCipher;

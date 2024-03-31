@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { asciiToBase64 } from "../utils/base64";
 
 function AffineCipher(){
     const [plaintext, setPlainText] = useState("")
@@ -133,6 +134,7 @@ function AffineCipher(){
                     </h1>
                     <textarea class="w-1/2 border border-gray-300 my-1" value = {plaintext} onChange={(e) => setPlainText(e.target.value)} rows = "5" placeholder="Your text here.."/>
                     <br/><b>Result: {encrypt(plaintext, slope, intercept)}</b>
+                    <br/><b>Result in Base64: {asciiToBase64(encrypt(plaintext, slope, intercept))}</b>
                     
                 </div>
             )}
